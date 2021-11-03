@@ -1,0 +1,27 @@
+#  Telefone
+
+Este endpoint retorna a validação do número informado se é de Angola e a qual operadora pertence.
+
+
+---
+
+**GET** `https://angolaapi.herokuapp.com/api/v1/validate/phone/`**[phone]**
+
+ Exemplo de consulta com sucesso
+```json
+// GET https://angolaapi.herokuapp.com/api/v1/validate/phone/+244923445618
+// Status: 200
+{
+  "message": "This is an Angola valid phone number",
+  "operator": "Unitel"
+}
+```
+
+Exemplo de consulta  com erro
+```json
+// GET https://angolaapi.herokuapp.com/api/v1/validate/phone/+8599562562
+// Status: 400
+{
+  "message": "Invalid phone number"
+}
+```

@@ -1,0 +1,28 @@
+# Bilhete de identidade
+
+Este endpoint retorna a validação se número informado é um bilhete de identidade nacional.
+
+
+---
+
+**GET** `https://angolaapi.herokuapp.com/api/v1/validate/bi/`**[bi]**
+
+Exemplo de consulta com sucesso
+
+```json
+// GET https://angolaapi.herokuapp.com/api/v1/validate/bi/006151112LA041
+// Status: 200
+{
+  "message": "This is an Angola valid bi number"
+}
+```
+
+
+Exemplo de consulta com erro
+```json
+// GET https://angolaapi.herokuapp.com/api/v1/validate/bi/006151112LA04A
+// Status: 400
+{
+  "message": "Invalid bi number"
+}
+```

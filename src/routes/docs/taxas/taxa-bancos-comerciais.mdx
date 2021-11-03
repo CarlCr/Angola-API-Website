@@ -1,0 +1,53 @@
+# Taxa de variação das duas moedas estrangeiras mais populares de Angola
+
+Este endpoint retorna o nome do banco, os dias e as taxas de juros de para depósitos a prazo efetuado pelos mesmos.
+
+---
+
+**GET** `https://angolaapi.herokuapp.com/api/v1/banks/rates/interest/term-deposit`
+
+Exemplo da consulta
+
+```json
+// GET https://angolaapi.herokuapp.com/api/v1/banks/rates/interest/term-deposit
+
+{
+  "date": "25 de Fevereiro de 2021",
+  "banks": [
+    {
+      "name": "Banco Millenium Atlântico - (ATL)",
+      "rates": [
+        {
+          "days": 30,
+          "rate": "3,50%"
+        },
+        {
+          "days": 90,
+          "rate": "5,00%"
+        },
+        {
+          "days": 360,
+          "rate": "7,00%"
+        }
+      ]
+    },
+    {
+      "name": "Banco Angolano de Investimentos - (BAI)",
+      "rates": [
+        {
+          "days": 30,
+          "rate": "4,50%"
+        },
+        {
+          "days": 90,
+          "rate": "7,00%"
+        },
+        {
+          "days": 360,
+          "rate": "11,0%"
+        }
+      ]
+    },
+    ...
+  ]
+```

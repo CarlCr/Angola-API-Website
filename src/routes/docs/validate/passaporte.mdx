@@ -1,0 +1,26 @@
+#  Passaporte
+
+Este endpoint retorna se o registo informado é aceitavél como identificador de um passaporte angolano.
+
+---
+
+**GET** `https://angolaapi.herokuapp.com/api/v1/validate/passport/`**[passport]**
+
+ Exemplo de consulta com sucesso
+```json
+// GET https://angolaapi.herokuapp.com/api/v1/validate/passport/n1234566
+// Status: 200
+{
+  "message": "This is an Angola valid passport number"
+}
+```
+
+Exemplo de  consulta com erro
+
+```json
+// GET https://angolaapi.herokuapp.com/api/v1/validate/passport/n12345667
+// Status: 400
+{
+  "message": "Invalid passport number"
+}
+```

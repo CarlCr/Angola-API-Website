@@ -1,0 +1,30 @@
+# Taxas de câmbio do Banco Nacional de Angola
+
+Este endpoint retorna as taxas de câmbio mais importantes do Banco Nacional de Angola.
+
+---
+
+**GET** `https://angolaapi.herokuapp.com/api/v1/banks/rates/exchange`
+
+ Exemplo da consulta
+ 
+```json
+// GET https://angola-api.com/api/v1/banks/rates/exchange
+
+{
+  "rates": [
+    {
+      "currency": "USD",
+      "rate": 635.762
+    },
+    {
+      "currency": "EUR",
+      "rate": 773.722
+    },
+    {
+      "currency": "ZAR",
+      "rate": 44.132
+    }
+  ]
+}
+```

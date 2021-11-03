@@ -1,0 +1,65 @@
+#  Províncias
+
+Este endpoint retorna a lista de províncias do território nacional ou apenas uma província se o ID for informado.
+
+---
+
+**GET** `https://angolaapi.herokuapp.com/api/v1/geography/provinces`
+
+ Exemplo da consulta
+
+```json
+// GET https://angolaapi.herokuapp.com/api/v1/geography/provinces
+
+[
+  {
+    "id": "6032c083c5686966bcc04202",
+    "nome": "Bengo",
+    "codigo": "BGO",
+    "capital": "Caxito",
+    "area": 15506,
+    "populacao": 356641,
+    "municipios": 6,
+    "comunas": 23
+  },
+  {
+    "id": "6032c083c5686966bcc04203",
+    "nome": "Benguela",
+    "codigo": "BGU",
+    "capital": "Benguela",
+    "area": 31788,
+    "populacao": 2231385,
+    "municipios": 10,
+    "comunas": 38
+  },
+  {
+    "id": "6032c083c5686966bcc04204",
+    "nome": "Bié",
+    "codigo": "BIE",
+    "capital": "Cuíto",
+    "area": 70314,
+    "populacao": 1455255,
+    "municipios": 9,
+    "comunas": 39
+  },
+  ...
+ ]
+```
+
+**GET** `https://angolaapi.herokuapp.com/api/v1/geography/provinces/`**[id]**
+
+Exemplo da consulta
+```json
+// GET https://angolaapi.herokuapp.com/api/v1/geography/provinces/6032c083c5686966bcc04210
+
+{
+  "id": "6032c083c5686966bcc04210",
+  "nome": "Moxico",
+  "codigo": "MOX",
+  "capital": "Luena",
+  "area": 223023,
+  "populacao": 758568,
+  "municipios": 9,
+  "comunas": 27
+}
+```

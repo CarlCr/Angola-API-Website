@@ -1,0 +1,32 @@
+# Taxa de Inflação
+
+Este endpoint retorna o valor da taxa de inflação do Banco Nacional de Angola.
+
+---
+
+**GET** `https://angolaapi.herokuapp.com/api/v1/banks/rates/inflation`
+
+Exemplo da consulta
+
+```json
+// GET https://angolaapi.herokuapp.com/api/v1/banks/rates/inflation
+
+{
+  "date": "14 de Fevereiro de 2021",
+  "status": "Dados referentes ao mês de Janeiro de 2021",
+  "rates": [
+    {
+      "type": "Inflação Mensal",
+      "rate": "1,50%"
+    },
+    {
+      "type": "Inflação Acumulada",
+      "rate": "1,50%"
+    },
+    {
+      "type": "Inflação Homóloga",
+      "rate": "24,41%"
+    }
+  ]
+}
+```

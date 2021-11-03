@@ -1,0 +1,30 @@
+# Taxa de Juros do Banco Nacional de Angola
+
+Este endpoint retorna o valor da taxa interbancária de oferta de fundos do mercado de Luanda.
+
+---
+
+**GET** `https://angolaapi.herokuapp.com/api/v1/banks/rates/interest/luibor`
+
+Exemplo da consulta
+```json
+// GET https://angolaapi.herokuapp.com/api/v1/banks/rates/interest/luibor
+
+{
+  "date": "10 de Setembro de 2020",
+  "rates": [
+    {
+      "maturity": "Overnight",
+      "rate": "5,38%"
+    },
+    {
+      "maturity": "3 Meses",
+      "rate": "12,35%"
+    },
+    {
+      "maturity": "12 Meses",
+      "rate": "16,14%"
+    }
+  ]
+}
+```
