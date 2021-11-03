@@ -1,0 +1,553 @@
+import React, { useState, useEffect, Fragment, useRef } from "react"
+import { Router, Link, Match, navigate } from "@reach/router"
+import { Helmet } from "react-helmet"
+import { ReactComponent as LogoAndName } from "../assets/images/logo-full.svg"
+import { ReactComponent as Logo } from "../assets/images/logo-simples.svg"
+import { ReactComponent as Github } from "../assets/images/github.svg"
+import { Close, Menu } from "../components/icons"
+import { ThemeProvider } from "../contexts/theme"
+import { RouterProvider } from "../contexts/router"
+import { useRouter } from "../hooks/use-router"
+import { useTheme } from "../hooks/use-theme"
+import SEO from "../components/seo"
+// import SignupForm from "../components/signup-form"
+import ErrorBoundary from "../components/error-boundary"
+import NotFound from "./not-found"
+import { sidebarWidth } from "../components/three-column-layout/desktop-nav"
+import "docsearch.js/dist/cdn/docsearch.min.css"
+import "@reach/dialog/styles.css"
+import { DialogOverlay, DialogContent } from "@reach/dialog"
+import useKeyboardShortcut from "../hooks/use-keyboard-shortcut"
+import { createGlobalStyle } from "styled-components"
+import "focus-visible/dist/focus-visible.min.js"
+import { createClient, Provider as UrqlProvider } from "urql"
+
+// Glob import all components in the route directory
+const routeComponentsMap = {}
+function importAll(r) {
+  r.keys().forEach((key) => {
+    let keyWithoutExtension = key.substr(0, key.lastIndexOf(".")) || key
+
+    routeComponentsMap[keyWithoutExtension] = r(key)
+  })
+}
+importAll(require.context("./", true, /\.(js|jsx|mdx|tx|tsx)$/))
+
+const themeClasses = {
+  light: {
+    active: "text-gray-900",
+    inactive: "text-gray-600 hover:text-gray-900",
+    divider: "border-gray-300",
+  },
+  dark: {
+    active: "text-gray-100",
+    inactive: "text-gray-500 hover:text-gray-100",
+    divider: "border-gray-700",
+  },
+}
+
+const client = createClient({
+  url: "https://miragejs-site-backend.herokuapp.com/v1/graphql",
+})
+
+export default function (props) {
+  return (
+    <RouterProvider {...props}>
+      <ThemeProvider {...props}>
+        <UrqlProvider value={client}>
+          <AppInner {...props} />
+        </UrqlProvider>
+      </ThemeProvider>
+    </RouterProvider>
+  )
+}
+
+function AppInner(props) {
+  let { theme } = useTheme()
+  let router = useRouter()
+  // activePage is not set for /api routes, once we fix this we should be able
+  // to remove this conditional logic.
+  let showHeaderNav = true // default
+  if (router.activePage && router.activePage.meta.showHeaderNav !== undefined) {
+    showHeaderNav = router.activePage.meta.showHeaderNav
+  }
+
+  let title
+  if (router.activePage && router.activePage.label) {
+    title = router.activePage.label
+  }
+
+  return (
+    <div className="relative z-0">
+      <Helmet>
+        <html className={`${theme === "dark" ? "bg-gray-1000" : "bg-white"}`} />
+      </Helmet>
+
+      <SEO title={title} />
+
+      <div className="flex flex-col min-h-screen antialiased leading-normal text-gray-700 font-body">
+        <Header showHeaderNav={showHeaderNav} />
+
+        <main className="flex flex-col flex-1">
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
+        </main>
+
+        <Footer />
+      </div>
+    </div>
+  )
+}
+
+function Header({ showHeaderNav }) {
+  const { theme } = useTheme()
+  const [isShowingMobileNav, setIsShowingMobileNav] = useState(false)
+  const [isShowingSearch, setIsShowingSearch] = useState(false)
+  const router = useRouter()
+
+  useKeyboardShortcut("/", () => setIsShowingSearch(true))
+
+  function handleSearchSelect(productionAlgoliaUrl) {
+    setIsShowingSearch(false)
+    let url = new URL(productionAlgoliaUrl)
+    navigate(`${url.pathname}${url.hash}`)
+  }
+
+  let fullWidthHeader = router.activePage?.meta?.fullWidthHeader
+  let shouldShowDivider = theme === "light" && !fullWidthHeader
+
+  return (
+    <div
+      className={`z-50 ${
+        theme === "dark"
+          ? "relative bg-gray-1000"
+          : "bg-white shadow fixed top-0 inset-x-0"
+      }`}
+    >
+      <div className="md:px-6">
+        <div className={fullWidthHeader ? null : "max-w-6xl mx-auto"}>
+          <header
+            className={`
+              ${isShowingMobileNav && theme === "dark" ? "bg-gray-900" : ""}
+            `}
+          >
+            <div
+              className={`flex items-center ${
+                theme === "dark" ? "h-24" : "h-16"
+              }`}
+            >
+              <div
+                className={`flex items-center ${
+                  shouldShowDivider ? "lg:border-r lg:border-gray-200" : ""
+                }`}
+                css={`
+                  @media (min-width: 1024px) {
+                    width: ${shouldShowDivider ? `${sidebarWidth}px` : "auto"};
+                  }
+                `}
+              >
+                <Link
+                  to="/"
+                  className="px-5 md:px-0 focus:outline-none focus-visible:shadow-outline"
+                  onClick={() => setIsShowingMobileNav(false)}
+                >
+                  <LogoAndName
+                    className={`
+                    ${
+                      theme === "dark"
+                        ? "w-24 md:w-28 lg:w-34 py-3 text-gray-100"
+                        : "w-24 md:w-28 text-gray-900"
+                    }
+                  `}
+                  />
+                </Link>
+              </div>
+
+              {/* Mobile nav button */}
+              {showHeaderNav ? (
+                <div className="ml-auto md:hidden">
+                  <button
+                    onClick={() => setIsShowingMobileNav(!isShowingMobileNav)}
+                    className={`flex px-5 py-3 2xl:py-2 items-center focus:outline-none ${themeClasses[theme]["inactive"]} lg:hidden `}
+                  >
+                    {isShowingMobileNav ? (
+                      <Close className="w-4 h-4" />
+                    ) : (
+                      <Menu className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              ) : null}
+
+              {/* Desktop nav */}
+              {showHeaderNav ? (
+                <>
+                  <div
+                    className={`hidden md:flex md:items-center md:ml-8
+                      ${theme === "dark" ? "pt-1" : ""}
+                    `}
+                    css={
+                      shouldShowDivider
+                        ? `
+                      /*
+                        here be dragons...
+
+                        The next one is easier to read, read that first.
+
+                        ...welcome back. This one depends on the viewport width. 100vw - 64px is
+                        now the total space reserved for the <main> area. Minus 280px for the sidebar,
+                        and then the rest is the same. The only other difference is we use the max()
+                        function because 2rem (the padding) will win when the content area starts
+                        getting less than 720px.
+                      */
+                      @media (min-width: 1024px) {
+                        margin-left: max(
+                          2rem,
+                          2rem + ((100vw - 64px - 280px - 2rem - 720px) / 2)
+                        );
+                      }
+
+                      /*
+                        This is a magic number for screens 1220px and above. The sidebar is 280px,
+                        leaving 1152px - 280px room for the main area. There's 2rem of padding, and
+                        above @media(1220px) the main text area will be 720px. That leaves 
+
+                          (1152px - 280px - 2rem - 720px)
+
+                        space left on either side of it for the dynamic margin value. Divid by 2
+                        to get the dynamic margin-left value, then add back in the padding.
+                      */
+                      @media (min-width: 1220px) {
+                        margin-left: calc(
+                          ((1152px - 280px - 2rem - 720px) / 2) + 2rem
+                        );
+                      }
+                    `
+                        : `
+                      @media (min-width: 1024px) {
+                        margin-left: 4rem;
+                      }
+                      `
+                    }
+                  >
+                    <div className={shouldShowDivider ? "-ml-1" : ""}>
+                      <NavLink
+                        to={router.routerFor("/docs").pages[0].url}
+                        activeFor="/docs/*"
+                      >
+                        Documentação
+                      </NavLink>
+                    </div>
+                  </div>
+                </>
+              ) : null}
+
+              <div className="hidden md:flex md:items-center md:ml-auto">
+                <a
+                  href="https://github.com/Angola-Api/Angola-Api"
+                  className={`focus:outline-none focus-visible:shadow-outline px-1 ${themeClasses[theme]["inactive"]}`}
+                >
+                  <Github className="h-5 fill-current" />
+                </a>
+              </div>
+            </div>
+
+            {/* Mobile nav */}
+            {isShowingMobileNav && (
+              <nav className="text-lg font-medium md:hidden">
+                <div
+                  className={`border-t ${
+                    theme === "dark" ? "border-gray-800" : "border-gray-200"
+                  }`}
+                >
+                  <MobileNavLink
+                    to="/docs/getting-started/introduction/"
+                    onClick={() => setIsShowingMobileNav(false)}
+                  >
+                    Documentação
+                  </MobileNavLink>
+                </div>
+
+
+                <div
+                  className={`border-t ${
+                    theme === "dark" ? "border-gray-800" : "border-gray-200"
+                  }`}
+                >
+                  <MobileNavLink
+                    to="https://github.com/Angola-Api/Angola-Api"
+                    onClick={() => setIsShowingMobileNav(false)}
+                  >
+                    GitHub
+                  </MobileNavLink>
+                </div>
+              </nav>
+            )}
+          </header>
+        </div>
+      </div>
+
+      {/* {isShowingSearch && (
+        <DialogOverlay
+          className="bg-gray-900.50"
+          onDismiss={() => setIsShowingSearch(false)}
+        >
+          <DialogContent
+            aria-label="search"
+            style={{
+              marginTop: 0,
+              marginBottom: 0,
+              padding: 0,
+              width: "auto",
+              maxWidth: "36rem",
+              background: "transparent",
+            }}
+          >
+            <Search onSelect={handleSearchSelect} />
+          </DialogContent>
+        </DialogOverlay>
+      )} */}
+    </div>
+  )
+}
+
+function MobileNavLink(props) {
+  const { theme } = useTheme()
+  const baseClasses = `block px-5 py-4`
+  const isExternal = props.to.indexOf("http") === 0
+  const linkClasses = {
+    light: {
+      active: "text-gray-900",
+      inactive: "text-gray-600 hover:text-gray-900",
+    },
+    dark: {
+      active: "text-gray-100",
+      inactive: "text-gray-100 hover:text-gray-100",
+    },
+  }
+
+  let link
+
+  if (isExternal) {
+    link = (
+      <a
+        href={props.to}
+        {...props}
+        className={`${baseClasses} ${linkClasses[theme]["inactive"]}`}
+      >
+        {props.children}
+      </a>
+    )
+  } else {
+    const isPartiallyActive = ({ isPartiallyCurrent }) => {
+      let state = isPartiallyCurrent ? "active" : "inactive"
+
+      return {
+        className: `${baseClasses} ${linkClasses[theme][state]}`,
+      }
+    }
+
+    link = <Link {...props} getProps={isPartiallyActive} />
+  }
+
+  return link
+}
+
+function NavLink({ activeFor, ...props }) {
+  const { theme } = useTheme()
+
+  activeFor = activeFor || props.to
+
+  return (
+    <Match path={activeFor}>
+      {({ match }) => {
+        let state = match ? "active" : "inactive"
+
+        return (
+          <Link
+            {...props}
+            className={`focus:outline-none focus-visible:shadow-outline mr-5 lg:mr-7 px-1 font-medium ${themeClasses[theme][state]}`}
+          />
+        )
+      }}
+    </Match>
+  )
+}
+
+let memoizedOutlet
+
+function renderRoutes(routes) {
+  return (
+    routes.length > 0 &&
+    routes.map((route) => {
+      let explicitComponent =
+        routeComponentsMap[`./${route.fullName.replace(/\./g, "/")}`]
+      let EmptyComponent = (props) => <Fragment>{props.children}</Fragment>
+      let Component = explicitComponent
+        ? explicitComponent.default
+        : EmptyComponent
+
+      return (
+        <Component path={route.path} key={route.fullName}>
+          {renderRoutes(route.routes)}
+        </Component>
+      )
+    })
+  )
+}
+
+function Outlet() {
+  let router = useRouter()
+
+  if (!memoizedOutlet) {
+    memoizedOutlet = renderRoutes(router.routes)
+  }
+
+  useEffect(() => {
+    if (!router.activePage && router.activeRoute) {
+      // we're not on a page, but we're somewhere in the router
+      // lets jump to the first rendering page
+      // tldr: /docs -> /docs/getting-started/introduction
+      let bestPage = router.activeRoute.pages[0]
+      if (!bestPage.isDynamic) {
+        navigate(bestPage.url, { replace: true })
+      }
+    }
+  }, [router.activePage, router.activeRoute])
+
+  return (
+    <Router primary={false} className="flex flex-col flex-1">
+      {memoizedOutlet}
+      <NotFound default />
+    </Router>
+  )
+}
+
+function Footer() {
+  let router = useRouter()
+
+  return (
+    <footer className="px-5 pt-16 pb-12 md:px-6 md:pb-20 bg-gray-1000 xl:px-16">
+      <div className="max-w-6xl mx-auto">
+        <div className="">
+          <div className="flex -mx-3 md:text-lg">
+            <div className="w-1/2 px-3 md:w-1/4">
+              <p className="py-1 text-sm tracking-wide text-gray-600 uppercase md:text-base">
+                Documentação
+              </p>
+              <div className="mt-1">
+                <ul>
+                  <li className="py-1 text-white">
+                    <Link to={router.routerFor("/docs").pages[0].url}>
+                      Sobre
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="w-1/2 px-3 md:w-1/4">
+              <p className="py-1 text-sm tracking-wide text-gray-600 uppercase md:text-base">
+                Comunidade
+              </p>
+              <div className="mt-1">
+                <ul>
+                  <li className="py-1 text-white">
+                    <a href="https://github.com/Angola-Api/Angola-Api">GitHub</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="py-10 sm:py-12">
+          <div className="sm:border-t sm:border-gray-800" />
+        </div>
+
+        <div className="sm:flex">
+          <div className="w-full max-w-xl">
+            {/* <SignupForm /> */}
+            <p>Copyright Angola API 2021 - Todos direitos reservados</p>
+          </div>
+
+          <div className="flex justify-center mt-16 sm:items-end sm:pl-32 sm:mt-0 sm:justify-end sm:ml-auto">
+            <Link to="/" className="block p-1">
+              <Logo className="w-8 sm:w-10" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+const AlgoliaStyles = createGlobalStyle`
+  .algolia-autocomplete {
+    display: block !important;
+  }
+  .algolia-autocomplete .ds-dropdown-menu {
+    width: 100%;
+  }
+  .algolia-autocomplete .suggestion-layout-simple .algolia-docsearch-suggestion--text .algolia-docsearch-suggestion--highlight{
+    color: red;
+  }
+  .algolia-autocomplete .ds-dropdown-menu .ds-suggestion.ds-cursor .algolia-docsearch-suggestion:not(.suggestion-layout-simple) .algolia-docsearch-suggestion--content {
+    background-color: rgba(5, 199, 126, .10)
+  }
+  .algolia-autocomplete .algolia-docsearch-suggestion--highlight {
+    color: rgba(3, 166, 103);
+  }
+  .algolia-autocomplete .algolia-docsearch-suggestion--category-header .algolia-docsearch-suggestion--category-header-lvl0 .algolia-docsearch-suggestion--highlight,.algolia-autocomplete .algolia-docsearch-suggestion--category-header .algolia-docsearch-suggestion--category-header-lvl1 .algolia-docsearch-suggestion--highlight,.algolia-autocomplete .algolia-docsearch-suggestion--text .algolia-docsearch-suggestion--highlight{
+    box-shadow: inset 0 -2px 0 0 rgba(3, 166, 103, .8);
+  }
+`
+
+function Search({ onSelect }) {
+  let inputRef = useRef()
+  useEffect(() => {
+    import("docsearch.js").then((module) => {
+      if (document.querySelector("#mirage-algolia-search-input")) {
+        module.default({
+          apiKey: "4df96bd592d6cdcc40aae9c4a76adc64",
+          indexName: "miragejs",
+          inputSelector: "#mirage-algolia-search-input",
+          debug: false, // Set debug to true to inspect the dropdown
+          handleSelected: function (
+            input,
+            event,
+            suggestion,
+            datasetNumber,
+            context
+          ) {
+            onSelect(suggestion.url)
+          },
+        })
+
+        inputRef.current.focus()
+      }
+    })
+  })
+
+  // Seems like aloglia stops keys from propagating. Would like to make ctrl+n/p navigate list.
+  // useKeyboardShortcut("ctrl+n", () => {
+  //   console.log("hi")
+  // })
+
+  return (
+    <>
+      <AlgoliaStyles />
+      <div className="flex items-center mt-24">
+        <div className="relative flex-1 rounded-md shadow-xl">
+          <input
+            id="mirage-algolia-search-input"
+            ref={inputRef}
+            className="block w-full px-5 py-4 text-lg rounded-lg focus:outline-none"
+            placeholder={`Search the docs (press "/" to focus)`}
+          />
+        </div>
+      </div>
+    </>
+  )
+}
