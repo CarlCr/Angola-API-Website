@@ -1,0 +1,59 @@
+@tailwind base;
+
+@keyframes loadingSpinnerRotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loadingSpinnerFade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.text-green-500{
+  color: #f4c933!important;
+}
+.h-41{
+  height: 10rem;
+}
+@media(max-width:456px){
+  .h-41{
+    height: 11rem!important;
+  }
+  .text-xl {
+    font-size: 0.75rem !important;
+  }
+  .px-1.font-mono{
+    word-wrap: break-word!important;
+  }
+}
+.bg-green-500{
+  background-color: #f4c933!important;
+}
+svg.loading {
+  transform-origin: 50% 50%;
+  animation: loadingSpinnerFade 0.2s,
+    loadingSpinnerRotate 0.7s steps(12, end) infinite;
+}
+
+.xl\:before-h-12:before {
+  display: block;
+  height: 6rem;
+  margin-top: -6rem;
+  visibility: hidden;
+  content: "";
+}
+
+@screen xl {
+  .xl\:before-h-12:before {
+    display: block;
+    height: 7rem;
+    margin-top: -7rem;
+    visibility: hidden;
+    content: "";
+  }
+}
